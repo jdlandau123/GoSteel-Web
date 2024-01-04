@@ -1,0 +1,27 @@
+<mat-toolbar color="primary">
+    <span>GoSteel Stand Orders</span>
+    <span class="spacer"></span>
+    <button mat-icon-button aria-label="menu icon" [matMenuTriggerFor]="menu">
+        <mat-icon>menu</mat-icon>
+    </button>
+  </mat-toolbar>
+  <mat-menu #menu="matMenu">
+    <form *ngIf="!(firebaseService.user | async)" [formGroup]="loginForm" class="menu" (click)="$event.stopPropagation();">
+        <mat-form-field appearance="outline">
+            <input type="email" matInput formControlName="email" placeholder="Email">
+            <mat-error *ngIf="!loginForm.controls.email.valid">Please enter a valid email address</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <input type="password" matInput formControlName="password" placeholder="Password">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="firebaseService.logIn(loginForm.value)">
+            Log In
+        </button>
+    </form>
+    <div *ngIf="(firebaseService.user | async) as user" class="menu">
+        <p>{{ user?.email }}</p>
+        <button mat-raised-button color="primary" (click)="firebaseService.logOut()">
+            Log out
+        </button>
+    </div>
+</mat-menu>
