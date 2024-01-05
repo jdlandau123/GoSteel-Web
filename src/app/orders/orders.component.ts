@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TitleService } from '../services/title.service';
 
 @Component({
   selector: 'app-orders',
@@ -9,5 +10,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./orders.component.css']
 })
 export class OrdersComponent {
+  constructor(private _titleService: TitleService) {
+    this._titleService.title.set('Orders');
+  }
 
 }

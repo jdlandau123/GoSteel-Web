@@ -1,27 +1,26 @@
 <mat-toolbar color="primary">
-    <span>GoSteel Stand Orders</span>
+    <span>GoSteel - {{titleService.title()}}</span>
     <span class="spacer"></span>
     <button mat-icon-button aria-label="menu icon" [matMenuTriggerFor]="menu">
         <mat-icon>menu</mat-icon>
     </button>
   </mat-toolbar>
   <mat-menu #menu="matMenu">
-    <form *ngIf="!(firebaseService.user | async)" [formGroup]="loginForm" class="menu" (click)="$event.stopPropagation();">
-        <mat-form-field appearance="outline">
-            <input type="email" matInput formControlName="email" placeholder="Email">
-            <mat-error *ngIf="!loginForm.controls.email.valid">Please enter a valid email address</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-            <input type="password" matInput formControlName="password" placeholder="Password">
-        </mat-form-field>
-        <button mat-raised-button color="primary" (click)="firebaseService.logIn(loginForm.value)">
-            Log In
-        </button>
-    </form>
-    <div *ngIf="(firebaseService.user | async) as user" class="menu">
-        <p>{{ user?.email }}</p>
+    <button mat-menu-item [routerLink]="'/new-order'">New Order</button>
+    <button mat-menu-item [routerLink]="'/orders'">Orders</button>
+    <button mat-menu-item [routerLink]="'/item-templates'">Item Templates</button>
+
+    <mat-divider></mat-divider>
+
+    <div *ngIf="firebaseService.isLoggedIn()" class="verticalWrapper">
+        <p>{{ (firebaseService.user | async)?.email }}</p>
         <button mat-raised-button color="primary" (click)="firebaseService.logOut()">
             Log out
+        </button>
+    </div>
+    <div *ngIf="!firebaseService.isLoggedIn()" class="verticalWrapper">
+        <button mat-raised-button color="primary" [routerLink]="'/login'">
+            Log in
         </button>
     </div>
 </mat-menu>

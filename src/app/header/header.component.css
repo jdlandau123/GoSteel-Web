@@ -1,18 +1,3 @@
 .spacer {
     flex: 1 1 auto;
 }
-
-.menu {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-}
-
-mat-form-field {
-    width: 100%;
-}
-
-mat-error {
-    font-size: 12px;
-}
