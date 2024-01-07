@@ -1,1 +1,42 @@
-<p>new-order works!</p>
+<div class="verticalWrapper">
+    <form mat-dialog-content [formGroup]="orderForm">
+        <mat-form-field appearance="outline">
+            <input type="text" matInput formControlName="firstName" placeholder="First Name">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <input type="text" matInput formControlName="lastName" placeholder="Last Name">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <input type="email" matInput formControlName="email" placeholder="Email">
+            <mat-error *ngIf="!orderForm.controls.email.valid">Invalid email address</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <input type="text" matInput formControlName="phone" placeholder="Phone">
+            <mat-error *ngIf="!orderForm.controls.phone.valid">Invalid phone number</mat-error>
+        </mat-form-field>
+        <mat-card *ngFor="let panel of newOrderService.panels" style="margin-bottom: 20px;">
+            <mat-card-header>
+                <mat-card-title style="font-size: large;">Panel #{{ panel.panelNumber }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <mat-button-toggle-group name="numPackages" value="{{panel.numPackages | async}}" (change)="numPackagesChange($event, panel)">
+                    <mat-button-toggle value="24">24 packages</mat-button-toggle>
+                    <mat-button-toggle value="12">12 packages</mat-button-toggle>
+                </mat-button-toggle-group>
+                <div class="packagesContainer">
+                    <div *ngFor="let package; index as i of panel.packages" class="package" (click)="setPackage(i, panel)">
+                        {{ package?.category }}
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </form>
+    <button mat-fab extended color="primary" class="btnCenter" [disabled]="newOrderService.panels.length >= 4"
+            (click)="newOrderService.addPanel()">
+        <mat-icon>add</mat-icon> Add Panel
+    </button>
+    <button mat-fab extended color="primary" (click)="save()" class="btnCenter" style="margin-top: 20px;">
+        <mat-icon>check</mat-icon> Save
+    </button>
+</div>
+

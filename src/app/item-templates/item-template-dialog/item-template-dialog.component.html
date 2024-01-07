@@ -3,6 +3,7 @@
 <form mat-dialog-content class="verticalWrapper" [formGroup]="itemTemplateForm">
     <mat-form-field appearance="outline">
         <input type="text" matInput formControlName="category" placeholder="Category" required>
+        <mat-error *ngIf="!itemTemplateForm.controls.category.valid">Required</mat-error>
     </mat-form-field>
     <mat-form-field appearance="outline">
         <input type="number" min="0" matInput formControlName="pricePerUnit" placeholder="Price Per Unit ($)" required>
@@ -21,7 +22,7 @@
     </mat-form-field>
 </form>
 
-<div mat-dialog-actions>
+<div mat-dialog-actions style="display: flex; justify-content: space-around;">
     <button mat-raised-button color="primary" [disabled]="!itemTemplateForm.valid" (click)="save()">
         Save
     </button>

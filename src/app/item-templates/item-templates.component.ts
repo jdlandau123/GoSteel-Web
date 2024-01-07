@@ -52,7 +52,9 @@ export class ItemTemplatesComponent implements OnInit {
         type,
         item
       }
-    }).afterClosed().subscribe(() => this.itemTemplates = this._firebaseService.query('ItemTemplates'));
+    }).afterClosed().subscribe(() => {
+      this.itemTemplates = this._firebaseService.query('ItemTemplates');
+    });
   }
 
 }

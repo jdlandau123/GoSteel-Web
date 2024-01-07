@@ -22,7 +22,7 @@ import {
   QueryFieldFilterConstraint,
   QueryOrderByConstraint,
 } from "firebase/firestore";
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { LoadingService } from './loading.service';
 import { from, map } from 'rxjs';
@@ -102,9 +102,8 @@ export class FirebaseService {
     else if (!whereClause && order) q = query(col, order);
     else q = query(col);
 
-    this._loadingService.isLoading.set(false);
-
     return from(getDocs(q)).pipe(
+      tap(() => this._loadingService.isLoading.set(false)),
       map(d => d.docs.map(i => ({id: i.id, ...i.data()}) as T))
     );
   }

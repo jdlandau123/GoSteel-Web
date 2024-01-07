@@ -10,7 +10,6 @@ import {
 } from '@angular/forms';
 import { IItemTemplate } from 'src/app/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
-import { iif, tap } from 'rxjs';
 
 interface IDialogData {
   type: 'Add' | 'Edit',
