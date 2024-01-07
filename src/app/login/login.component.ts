@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
+import { MaterialModule } from '../material.module';
 import {
   ReactiveFormsModule,
   FormGroup,
   FormControl,
   Validators
 } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { FirebaseService } from '../services/firebase.service';
 import { TitleService } from '../services/title.service';
 
@@ -17,10 +15,8 @@ import { TitleService } from '../services/title.service';
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatFormFieldModule
+    MaterialModule,
+    ReactiveFormsModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']

@@ -1,13 +1,13 @@
 <form *ngIf="!firebaseService.isLoggedIn()" class="verticalWrapper" [formGroup]="loginForm">
     <p>Please Log In</p>
     <mat-form-field appearance="outline">
-        <input type="email" matInput formControlName="email" placeholder="Email">
+        <input type="email" matInput formControlName="email" placeholder="Email" required>
         <mat-error *ngIf="!loginForm.controls.email.valid">Please enter a valid email address</mat-error>
     </mat-form-field>
     <mat-form-field appearance="outline">
-        <input type="password" matInput formControlName="password" placeholder="Password">
+        <input type="password" matInput formControlName="password" placeholder="Password" required>
     </mat-form-field>
-    <button mat-raised-button color="primary" (click)="firebaseService.logIn(loginForm.value)">
+    <button mat-raised-button color="primary" (click)="firebaseService.logIn(loginForm.getRawValue())">
         Log In
     </button>
 </form>

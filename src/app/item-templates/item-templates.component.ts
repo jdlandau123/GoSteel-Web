@@ -1,15 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
+import { MaterialModule } from '../material.module';
 import {
   ReactiveFormsModule,
   FormGroup,
   FormControl,
 } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { ItemTemplateDialogComponent } from './item-template-dialog/item-template-dialog.component';
 import { FirebaseService } from '../services/firebase.service';
 import { TitleService } from '../services/title.service';
+import { LoadingService } from '../services/loading.service';
 import { IItemTemplate } from '../interfaces';
 import { Observable } from 'rxjs';
 
@@ -18,9 +19,7 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatListModule,
+    MaterialModule,
     ReactiveFormsModule
   ],
   templateUrl: './item-templates.component.html',
@@ -37,12 +36,23 @@ export class ItemTemplatesComponent implements OnInit {
     description: new FormControl<string>(null)
   });
 
-  constructor(private _firebaseService: FirebaseService, private _titleService: TitleService) {
+  constructor(private _firebaseService: FirebaseService, private _titleService: TitleService,
+              public loadingService: LoadingService, public dialog: MatDialog) {
     this._titleService.title.set('Item Templates');
   }
 
   ngOnInit(): void {
-    // this.itemTemplates = this._firebaseService.query('ItemTemplates');
+    this.itemTemplates = this._firebaseService.query('ItemTemplates');
+  }
+
+  openDialog(type: 'Add' | 'Edit', item: IItemTemplate = null) {
+    this.dialog.open(ItemTemplateDialogComponent, {
+      width: '500px',
+      data: {
+        type,
+        item
+      }
+    }).afterClosed().subscribe(() => this.itemTemplates = this._firebaseService.query('ItemTemplates'));
   }
 
 }

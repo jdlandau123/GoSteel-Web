@@ -14,15 +14,17 @@ import {
   collection,
   doc,
   query,
-  orderBy,
   getDoc,
   getDocs,
   addDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  QueryFieldFilterConstraint,
+  QueryOrderByConstraint,
 } from "firebase/firestore";
 import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
+import { LoadingService } from './loading.service';
 import { from, map } from 'rxjs';
 
 @Injectable({
@@ -36,7 +38,7 @@ export class FirebaseService {
   user: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   isLoggedIn = signal(false);
 
-  constructor(private _router: Router) {
+  constructor(private _router: Router, private _loadingService: LoadingService) {
     this.firebaseApp.subscribe(app => {
       this.firebaseAnalytics = getAnalytics(app);
       this.db = getFirestore(app);
@@ -87,13 +89,23 @@ export class FirebaseService {
   }
 
   // database
-  query<T>(collectionName: string, where: any = null, order: {field: string, direction: 'asc' | 'desc'} | null = null) {
+  query<T>(collectionName: string, whereClause: QueryFieldFilterConstraint = null, order: QueryOrderByConstraint = null) {
     // where should be a firebase where object
-    const q = order
-              ? query(collection(this.db, collectionName), where, orderBy(order.field, order.direction))
-              : query(collection(this.db, collectionName));
+    // order should be a firebase orderBy object
+    this._loadingService.isLoading.set(true);
+
+    let q;
+    const col = collection(this.db, collectionName);
+
+    if (whereClause && order) q = query(col, whereClause, order);
+    else if (whereClause && !order) q = query(col, whereClause);
+    else if (!whereClause && order) q = query(col, order);
+    else q = query(col);
+
+    this._loadingService.isLoading.set(false);
+
     return from(getDocs(q)).pipe(
-      map(d => d.docs.map(i => i.data() as T))
+      map(d => d.docs.map(i => ({id: i.id, ...i.data()}) as T))
     );
   }
 
@@ -110,17 +122,16 @@ export class FirebaseService {
   }
 
   async createItem(collectionName: string, object: any) {
-    const createdDoc = await addDoc(collection(this.db, collectionName), object);
-    console.log(createdDoc);
+    return await addDoc(collection(this.db, collectionName), object);
   }
 
   async updateItem(collectionName: string, itemId: string, updates: any) {
     const docRef = doc(this.db, collectionName, itemId);
-    await updateDoc(docRef, updates);
+    return await updateDoc(docRef, updates);
   }
 
   async deleteItem(collectionName: string, itemId: string) {
-    await deleteDoc(doc(this.db, collectionName, itemId));
+    return await deleteDoc(doc(this.db, collectionName, itemId));
   }
 
 }
