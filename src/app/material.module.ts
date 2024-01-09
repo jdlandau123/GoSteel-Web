@@ -9,9 +9,12 @@ import { MatListModule } from '@angular/material/list';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
 
 @NgModule({
   declarations: [],
@@ -30,8 +33,14 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     MatCardModule,
     MatDialogModule,
     MatProgressSpinnerModule,
-    MatButtonToggleModule
-
+    MatButtonToggleModule,
+    MatSnackBarModule,
+    MatTableModule,
+    MatSortModule
+  ],
+  providers: [
+    { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 2500} },
+    { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {width: '350px'} },
   ]
 })
 export class MaterialModule { }

@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Order Details</h1>
+
+<div mat-dialog-content class="verticalWrapper">
+    <p>Customer Name: {{data.order.firstName}} {{data.order.lastName}}</p>
+    <p>Customer Email: {{data.order.email}}</p>
+    <p>Customer Phone: {{data.order.phone}}</p>
+    <p>Order Date: {{timestampToDate(data.order?.dateCreated) | date : 'shortDate'}}</p>
+    <p>Total Price: {{data.order.totalPrice | currency}}</p>
+    <p>Date Paid: {{timestampToDate(data.order?.datePaid) | date : 'shortDate'}}</p>
+    <p>Date Completed: {{timestampToDate(data.order?.dateCompleted) | date : 'shortDate'}}</p>
+</div>

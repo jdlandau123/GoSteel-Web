@@ -2,4 +2,52 @@
     <button mat-fab extended color="primary" class="btnCenter" [routerLink]="'/new-order'">
         <mat-icon>add</mat-icon> New Order
     </button>
+
+    <!-- <div *ngIf="loadingService.isLoading()" style="display: flex; justify-content: center; margin-top: 20px;">
+        <mat-spinner></mat-spinner>
+    </div> -->
+
+    <!-- <mat-form-field appearance="outline" style="margin-top: 20px;">
+        <input matInput type="text" placeholder="Search" [formControl]="searchInput" />
+    </mat-form-field> -->
+
+    <table *ngIf="(orders | async).length > 0" mat-table [dataSource]="orders | async" matSort
+            (matSortChange)="sortTable($event)" class="mat-elevation-z8" style="margin-top: 20px;">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let element">{{element?.firstName}} {{element?.lastName}}</td>
+        </ng-container>
+      
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let element">{{timestampToDate(element?.dateCreated) | date : 'shortDate'}}</td>
+        </ng-container>
+      
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
+          <td mat-cell *matCellDef="let element">{{element?.totalPrice | currency}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="delete">
+            <th mat-header-cell *matHeaderCellDef>Delete</th>
+            <td mat-cell *matCellDef="let element">
+                <button mat-icon-button (click)="$event.stopPropagation(); deleteOrder(element)">
+                    <mat-icon color="warn">delete</mat-icon>
+                </button>
+            </td>
+        </ng-container>
+      
+        <!-- <ng-container matColumnDef="datePaid">
+          <th mat-header-cell *matHeaderCellDef>Date Paid</th>
+          <td mat-cell *matCellDef="let element">{{timestampToDate(element?.datePaid) | date : 'shortDate'}}</td>
+        </ng-container> -->
+
+        <!-- <ng-container matColumnDef="dateCompleted">
+            <th mat-header-cell *matHeaderCellDef>Date Completed</th>
+            <td mat-cell *matCellDef="let element">{{timestampToDate(element?.dateCompleted) | date : 'shortDate'}}</td>
+        </ng-container> -->
+
+        <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: tableColumns;" (click)="openOrder(row)"></tr>
+      </table>
 </div>

@@ -91,7 +91,7 @@ export class FirebaseService {
   }
 
   // database
-  query<T>(collectionName: string, whereClause: QueryFieldFilterConstraint = null, order: QueryOrderByConstraint = null) {
+  query<T>(collectionName: string, whereClause: any = null, order: QueryOrderByConstraint = null) {
     // where should be a firebase where object
     // order should be a firebase orderBy object
     this._loadingService.isLoading.set(true);

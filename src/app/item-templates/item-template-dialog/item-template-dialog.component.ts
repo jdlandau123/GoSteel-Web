@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from 'src/app/material.module';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {
   ReactiveFormsModule,
   FormGroup,
@@ -10,6 +10,8 @@ import {
 } from '@angular/forms';
 import { IItemTemplate } from 'src/app/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
+import { DeleteConfirmationDialogComponent } from 'src/app/delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { filter } from 'rxjs';
 
 interface IDialogData {
   type: 'Add' | 'Edit',
@@ -39,7 +41,8 @@ export class ItemTemplateDialogComponent implements OnInit {
 
   constructor(public dialogRef: MatDialogRef<ItemTemplateDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: IDialogData,
-              private _firebaseService: FirebaseService) {}
+              private _firebaseService: FirebaseService,
+              private _dialog: MatDialog) {}
 
   ngOnInit(): void {
     if (this.data.item) {
@@ -54,7 +57,18 @@ export class ItemTemplateDialogComponent implements OnInit {
   }
 
   async delete() {
-    await this._firebaseService.deleteItem('ItemTemplates', this.data?.item.id);
-    this.dialogRef.close();
+    this._dialog.open(DeleteConfirmationDialogComponent, {
+      data: {
+        itemType: 'Item Template'
+      }
+    }).afterClosed().pipe(
+      filter(r => r)
+    ).subscribe(async (confirmed: boolean) => {
+      if (confirmed) {
+        await this._firebaseService.deleteItem('ItemTemplates', this.data?.item.id);
+        this.dialogRef.close();
+      }
+    })
   }
+
 }

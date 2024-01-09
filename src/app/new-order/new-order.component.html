@@ -14,30 +14,30 @@
             <input type="text" matInput formControlName="phone" placeholder="Phone">
             <mat-error *ngIf="!orderForm.controls.phone.valid">Invalid phone number</mat-error>
         </mat-form-field>
-        <mat-card *ngFor="let panel of panels" style="margin-bottom: 20px;">
-            <mat-card-header>
-                <mat-card-title style="font-size: large;">Panel #{{ panel.panelNumber }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <mat-button-toggle-group name="numPackages" value="{{panel.numPackages | async}}" (change)="numPackagesChange($event, panel)">
-                    <mat-button-toggle value="24">24 packages</mat-button-toggle>
-                    <mat-button-toggle value="12">12 packages</mat-button-toggle>
-                </mat-button-toggle-group>
-                <div class="packagesContainer">
-                    <button mat-flat-button color="accent" *ngFor="let package; index as i of panel.packages"
-                            class="package" (click)="setPackage(i, panel)">
-                        {{ package?.category }}
-                    </button>
-                </div>
-            </mat-card-content>
-            <div mat-dialog-actions style="display: flex; justify-content: flex-start;">
-                <button mat-icon-button color="warn" (click)="deletePanel(panel)">
-                    <mat-icon>delete</mat-icon>
+    </form>
+    <mat-card *ngFor="let panel of panels" style="margin-bottom: 20px;">
+        <mat-card-header>
+            <mat-card-title style="font-size: large;">Panel #{{ panel.panelNumber }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-button-toggle-group name="numPackages" value="{{panel.numPackages | async}}" (change)="numPackagesChange($event, panel)">
+                <mat-button-toggle value="24">24 packages</mat-button-toggle>
+                <mat-button-toggle value="12">12 packages</mat-button-toggle>
+            </mat-button-toggle-group>
+            <div class="packagesContainer">
+                <button mat-flat-button color="accent" *ngFor="let package; index as i of panel.packages"
+                        class="package" (click)="setPackage(i, panel)">
+                    {{ package?.category }}
                 </button>
             </div>
-        </mat-card>
-    </form>
-    <button mat-fab extended color="primary" class="btnCenter" [disabled]="panels.length >= 4"
+        </mat-card-content>
+        <div mat-dialog-actions style="display: flex; justify-content: flex-start;">
+            <button mat-icon-button color="warn" (click)="deletePanel(panel)">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </div>
+    </mat-card>
+    <button mat-fab extended color="primary" class="btnCenter" [disabled]="this.panels.length >= 4"
             (click)="addPanel()">
         <mat-icon>add</mat-icon> Add Panel
     </button>

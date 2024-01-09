@@ -47,7 +47,6 @@ export class ItemTemplatesComponent implements OnInit {
 
   openDialog(type: 'Add' | 'Edit', item: IItemTemplate = null) {
     this.dialog.open(ItemTemplateDialogComponent, {
-      width: '500px',
       data: {
         type,
         item
