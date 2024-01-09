@@ -33,5 +33,5 @@
         Save
     </button>
     <button mat-raised-button color="accent" (click)="dialogRef.close()">Cancel</button>
-    <button mat-raised-button color="warn" (click)="delete()">Delete</button>
+    <button *ngIf="data.type === 'Edit'" mat-raised-button color="warn" (click)="delete()">Delete</button>
 </div>

@@ -94,7 +94,6 @@ export class OrdersComponent implements OnInit {
         this._firebaseService.query<IOrder>('Orders').subscribe(o => this.orders.next(o));
       }
     });
-
   }
 
 }
