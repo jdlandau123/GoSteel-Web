@@ -1,23 +1,29 @@
 <h1 mat-dialog-title>{{ data.type }} Item Template</h1>
 
-<form mat-dialog-content class="verticalWrapper" [formGroup]="itemTemplateForm">
+<form mat-dialog-content class="verticalWrapper" [formGroup]="itemTemplateForm" style="padding-top: 20px;">
     <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
         <input type="text" matInput formControlName="category" placeholder="Category" required>
         <mat-error *ngIf="!itemTemplateForm.controls.category.valid">Required</mat-error>
     </mat-form-field>
     <mat-form-field appearance="outline">
+        <mat-label>Price Per Unit</mat-label>
         <input type="number" min="0" matInput formControlName="pricePerUnit" placeholder="Price Per Unit ($)" required>
     </mat-form-field>
     <mat-form-field appearance="outline">
+        <mat-label>Number of Units</mat-label>
         <input type="number" min="0" matInput formControlName="unitCount" placeholder="Number of Units" required>
     </mat-form-field>
     <mat-form-field appearance="outline">
+        <mat-label>Number of Hooks</mat-label>
         <input type="number" min="0" matInput formControlName="hooks" placeholder="Number of Hooks" required>
     </mat-form-field>
     <mat-form-field appearance="outline">
+        <mat-label>Color</mat-label>
         <input type="text" matInput formControlName="color" placeholder="Color">
     </mat-form-field>
     <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
         <input type="text" matInput formControlName="description" placeholder="Description">
     </mat-form-field>
 </form>

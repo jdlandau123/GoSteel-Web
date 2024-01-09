@@ -1,16 +1,20 @@
 <div class="verticalWrapper">
     <form mat-dialog-content [formGroup]="orderForm">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="padding-top: 20px;">
+            <mat-label>First Name</mat-label>
             <input type="text" matInput formControlName="firstName" placeholder="First Name">
         </mat-form-field>
         <mat-form-field appearance="outline">
+            <mat-label>Last Name</mat-label>
             <input type="text" matInput formControlName="lastName" placeholder="Last Name">
         </mat-form-field>
         <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
             <input type="email" matInput formControlName="email" placeholder="Email">
             <mat-error *ngIf="!orderForm.controls.email.valid">Invalid email address</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
             <input type="text" matInput formControlName="phone" placeholder="Phone">
             <mat-error *ngIf="!orderForm.controls.phone.valid">Invalid phone number</mat-error>
         </mat-form-field>
