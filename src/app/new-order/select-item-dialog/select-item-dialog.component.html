@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Select Item</h1>
+
+<div mat-dialog-content class="verticalWrapper">
+    <mat-card *ngFor="let item of data.itemTemplates" (click)="dialogRef.close(item)">
+        <mat-card-header>
+            <mat-card-title style="font-weight: bold;">{{ item?.category }}</mat-card-title>
+            <mat-card-subtitle>{{ item?.description }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content style="display: flex; justify-content: space-between;">
+            <p>${{ item?.pricePerUnit }}/unit</p>
+            <p>x{{ item?.unitCount }}</p>
+            <p>{{ item?.hooks }} hooks</p>
+            <p>{{ item?.color }}</p>
+        </mat-card-content>
+    </mat-card>
+</div>

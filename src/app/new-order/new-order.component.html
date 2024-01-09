@@ -14,7 +14,7 @@
             <input type="text" matInput formControlName="phone" placeholder="Phone">
             <mat-error *ngIf="!orderForm.controls.phone.valid">Invalid phone number</mat-error>
         </mat-form-field>
-        <mat-card *ngFor="let panel of newOrderService.panels" style="margin-bottom: 20px;">
+        <mat-card *ngFor="let panel of panels" style="margin-bottom: 20px;">
             <mat-card-header>
                 <mat-card-title style="font-size: large;">Panel #{{ panel.panelNumber }}</mat-card-title>
             </mat-card-header>
@@ -24,15 +24,21 @@
                     <mat-button-toggle value="12">12 packages</mat-button-toggle>
                 </mat-button-toggle-group>
                 <div class="packagesContainer">
-                    <div *ngFor="let package; index as i of panel.packages" class="package" (click)="setPackage(i, panel)">
+                    <button mat-flat-button color="accent" *ngFor="let package; index as i of panel.packages"
+                            class="package" (click)="setPackage(i, panel)">
                         {{ package?.category }}
-                    </div>
+                    </button>
                 </div>
             </mat-card-content>
+            <div mat-dialog-actions style="display: flex; justify-content: flex-start;">
+                <button mat-icon-button color="warn" (click)="deletePanel(panel)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
         </mat-card>
     </form>
-    <button mat-fab extended color="primary" class="btnCenter" [disabled]="newOrderService.panels.length >= 4"
-            (click)="newOrderService.addPanel()">
+    <button mat-fab extended color="primary" class="btnCenter" [disabled]="panels.length >= 4"
+            (click)="addPanel()">
         <mat-icon>add</mat-icon> Add Panel
     </button>
     <button mat-fab extended color="primary" (click)="save()" class="btnCenter" style="margin-top: 20px;">

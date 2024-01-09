@@ -40,8 +40,10 @@ export class FirebaseService {
 
   constructor(private _router: Router, private _loadingService: LoadingService) {
     this.firebaseApp.subscribe(app => {
-      this.firebaseAnalytics = getAnalytics(app);
-      this.db = getFirestore(app);
+      if (app) {
+        this.firebaseAnalytics = getAnalytics(app);
+        this.db = getFirestore(app);
+      }
     });
 
     this.firebaseApp.next(initializeApp(environment.firebaseConfig));
