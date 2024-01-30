@@ -1,52 +1,156 @@
 <div class="verticalWrapper">
-    <form mat-dialog-content [formGroup]="orderForm">
-        <mat-form-field appearance="outline" style="padding-top: 20px;">
-            <mat-label>First Name</mat-label>
-            <input type="text" matInput formControlName="firstName" placeholder="First Name">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-            <mat-label>Last Name</mat-label>
-            <input type="text" matInput formControlName="lastName" placeholder="Last Name">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input type="email" matInput formControlName="email" placeholder="Email">
-            <mat-error *ngIf="!orderForm.controls.email.valid">Invalid email address</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-            <mat-label>Phone</mat-label>
-            <input type="text" matInput formControlName="phone" placeholder="Phone">
-            <mat-error *ngIf="!orderForm.controls.phone.valid">Invalid phone number</mat-error>
-        </mat-form-field>
-    </form>
-    <mat-card *ngFor="let panel of panels" style="margin-bottom: 20px;">
-        <mat-card-header>
-            <mat-card-title style="font-size: large;">Panel #{{ panel.panelNumber }}</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-            <mat-button-toggle-group name="numPackages" value="{{panel.numPackages | async}}" (change)="numPackagesChange($event, panel)">
-                <mat-button-toggle value="24">24 packages</mat-button-toggle>
-                <mat-button-toggle value="12">12 packages</mat-button-toggle>
-            </mat-button-toggle-group>
-            <div class="packagesContainer">
-                <button mat-flat-button color="accent" *ngFor="let package; index as i of panel.packages"
-                        class="package" (click)="setPackage(i, panel)">
-                    {{ package?.category }}
-                </button>
-            </div>
-        </mat-card-content>
-        <div mat-dialog-actions style="display: flex; justify-content: flex-start;">
-            <button mat-icon-button color="warn" (click)="deletePanel(panel)">
-                <mat-icon>delete</mat-icon>
-            </button>
-        </div>
-    </mat-card>
-    <button mat-fab extended color="primary" class="btnCenter" [disabled]="this.panels.length >= 4"
-            (click)="addPanel()">
-        <mat-icon>add</mat-icon> Add Panel
+  <div class="currentShow">
+    <p>Current Show: {{currentShow.value?.name}}</p>
+    <button mat-icon-button (click)="openShowDialog()">
+      <mat-icon>edit</mat-icon>
     </button>
-    <button mat-fab extended color="primary" (click)="save()" class="btnCenter" style="margin-top: 20px;">
-        <mat-icon>check</mat-icon> Save
-    </button>
+  </div>
+  <form [formGroup]="customerForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Search Existing Customers</mat-label>
+      <input matInput type="text" [formControl]="customerSearch" [matAutocomplete]="auto"
+             placeholder="Search">
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="autocompleteDisplayFn"
+                        (optionSelected)="onAutocompleteSelect($event)">
+        <mat-option *ngFor="let customer of filteredCustomers | async" [value]="customer">
+          {{customer?.firstName}} {{customer?.lastName}}
+        </mat-option>
+      </mat-autocomplete>
+      <button matSuffix mat-icon-button (click)="clearAutocomplete(auto)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <p>Customer Details</p>
+    <mat-form-field appearance="outline">
+      <mat-label>First Name</mat-label>
+      <input type="text" matInput formControlName="firstName" placeholder="First Name">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Last Name</mat-label>
+      <input type="text" matInput formControlName="lastName" placeholder="Last Name">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input type="email" matInput formControlName="email" placeholder="Email">
+      <mat-error *ngIf="!customerForm.controls.email.valid">Invalid email address</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Phone</mat-label>
+      <input type="text" matInput formControlName="phone" placeholder="Phone">
+      <mat-error *ngIf="!customerForm.controls.phone.valid">Invalid phone number</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Work Phone</mat-label>
+      <input type="text" matInput formControlName="workPhone" placeholder="Work Phone">
+      <mat-error *ngIf="!customerForm.controls.phone.valid">Invalid phone number</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Company Name</mat-label>
+      <input type="text" matInput formControlName="companyName" placeholder="Company Name">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Business Type</mat-label>
+      <input type="text" matInput formControlName="businessType" placeholder="Business Type">
+    </mat-form-field>
+  </form>
+  <form [formGroup]="shippingAddressForm">
+    <p>Shipping Address</p>
+    <mat-form-field appearance="outline">
+      <mat-label>Street Address</mat-label>
+      <input type="text" matInput formControlName="streetAddress" placeholder="Street Address">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>City</mat-label>
+      <input type="text" matInput formControlName="city" placeholder="City">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>State</mat-label>
+      <mat-select formControlName="state">
+        <mat-option *ngFor="let state of usStateNames" [value]="state">
+          {{state}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Zip Code</mat-label>
+      <input type="text" matInput formControlName="zip" placeholder="Zip Code">
+    </mat-form-field>
+  </form>
+  <form [formGroup]="billingAddressForm">
+    <p>Billing Address</p>
+    <mat-checkbox color="primary" (change)="handleBillingAddressCheckbox($event)">
+      Same as shipping address
+    </mat-checkbox>
+    <mat-form-field appearance="outline">
+      <mat-label>Street Address</mat-label>
+      <input type="text" matInput formControlName="streetAddress" placeholder="Street Address">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>City</mat-label>
+      <input type="text" matInput formControlName="city" placeholder="City">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>State</mat-label>
+      <mat-select formControlName="state">
+        <mat-option *ngFor="let state of usStateNames" [value]="state">
+          {{state}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Zip Code</mat-label>
+      <input type="text" matInput formControlName="zip" placeholder="Zip Code">
+    </mat-form-field>
+  </form>
+  <form [formGroup]="orderForm">
+    <p>Order Details</p>
+    <mat-form-field appearance="outline">
+      <mat-label>Stand Color</mat-label>
+      <mat-select formControlName="standColor">
+        <mat-option *ngFor="let sc of standColors" [value]="sc">
+          {{sc | titlecase}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Notes</mat-label>
+      <textarea matInput formControlName="notes" placeholder="Notes"></textarea>
+    </mat-form-field>
+  </form>
+  <mat-card *ngFor="let panel of panels" style="margin-bottom: 20px;" style="width: 100%; margin-bottom: 10px;">
+    <mat-card-header>
+      <mat-card-title style="font-size: large;">Panel #{{ panel.panelNumber }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-button-toggle-group name="numPackages" value="{{panel.numPackages | async}}" (change)="numPackagesChange($event, panel)">
+        <mat-button-toggle value="1">Full</mat-button-toggle>
+        <mat-button-toggle value="2">Half</mat-button-toggle>
+      </mat-button-toggle-group>
+      <div class="packagesContainer">
+        <button mat-flat-button color="accent" *ngFor="let package; index as i of panel.packages"
+                class="package" (click)="setPackage(i, panel)"
+                [style.height]="setPackageHeight(panel)">
+          <ul *ngIf="package?.item.name" class="packageText">
+            <li>{{ package?.item.name | titlecase }}</li>
+            <li>{{ package?.color | titlecase }}</li>
+            <li>{{ package?.item.pricePerUnit | currency }}/unit</li>
+            <li>{{ package?.description }}</li>
+          </ul>
+        </button>
+      </div>
+    </mat-card-content>
+    <div style="display: flex; justify-content: flex-start;">
+      <button mat-icon-button color="warn" (click)="deletePanel(panel)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </mat-card>
+  <button mat-fab extended color="primary" class="btnCenter" [disabled]="this.panels.length >= 4"
+          (click)="addPanel()" style="margin-top: 10px;">
+    <mat-icon>add</mat-icon> Add Panel
+  </button>
+  <button mat-fab extended color="primary" (click)="save()" class="btnCenter" style="margin-top: 20px;">
+    <mat-icon>check</mat-icon> Save
+  </button>
 </div>
 

@@ -19,8 +19,8 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  QueryFieldFilterConstraint,
   QueryOrderByConstraint,
+  Timestamp,
 } from "firebase/firestore";
 import { BehaviorSubject, tap } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
@@ -110,15 +110,17 @@ export class FirebaseService {
     );
   }
 
+  async checkItemExists(collectionName: string, whereClause: any) {
+    const col = collection(this.db, collectionName);
+    const q = query(col, whereClause);
+    const querySnap = await getDocs(q);
+    return querySnap.docs.length > 0;
+  }
+
   async getItem(collectionName: string, itemId: string) {
     const docRef = doc(this.db, collectionName, itemId);
     const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
-    } else {
-      console.log("No such document!");
-    }
+    return docSnap.data();
   }
 
   async createItem(collectionName: string, object: any) {

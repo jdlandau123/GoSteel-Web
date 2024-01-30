@@ -1,37 +1,21 @@
-<h1 mat-dialog-title>{{ data.type }} Item Template</h1>
+<h1 mat-dialog-title>{{ data.type }} Item</h1>
 
-<form mat-dialog-content class="verticalWrapper" [formGroup]="itemTemplateForm" style="padding-top: 20px;">
+<form mat-dialog-content [formGroup]="itemForm" style="padding-top: 20px;">
     <mat-form-field appearance="outline">
-        <mat-label>Category</mat-label>
-        <input type="text" matInput formControlName="category" placeholder="Category" required>
-        <mat-error *ngIf="!itemTemplateForm.controls.category.valid">Required</mat-error>
+        <mat-label>Name</mat-label>
+        <input type="text" matInput formControlName="name" placeholder="Name" required>
+        <mat-error *ngIf="!itemForm.controls.name.valid">Required</mat-error>
     </mat-form-field>
     <mat-form-field appearance="outline">
         <mat-label>Price Per Unit</mat-label>
         <input type="number" min="0" matInput formControlName="pricePerUnit" placeholder="Price Per Unit ($)" required>
     </mat-form-field>
-    <mat-form-field appearance="outline">
-        <mat-label>Number of Units</mat-label>
-        <input type="number" min="0" matInput formControlName="unitCount" placeholder="Number of Units" required>
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-        <mat-label>Number of Hooks</mat-label>
-        <input type="number" min="0" matInput formControlName="hooks" placeholder="Number of Hooks" required>
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-        <mat-label>Color</mat-label>
-        <input type="text" matInput formControlName="color" placeholder="Color">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-        <mat-label>Description</mat-label>
-        <input type="text" matInput formControlName="description" placeholder="Description">
-    </mat-form-field>
 </form>
 
 <div mat-dialog-actions style="display: flex; justify-content: space-around;">
-    <button mat-raised-button color="primary" [disabled]="!itemTemplateForm.valid" (click)="save()">
+    <button mat-raised-button color="primary" [disabled]="!itemForm.valid" (click)="save()">
         Save
     </button>
-    <button mat-raised-button color="accent" (click)="dialogRef.close()">Cancel</button>
+    <button mat-raised-button color="accent" (click)="dialogRef.close('cancelled')">Cancel</button>
     <button *ngIf="data.type === 'Edit'" mat-raised-button color="warn" (click)="delete()">Delete</button>
 </div>

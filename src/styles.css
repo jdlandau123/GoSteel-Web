@@ -30,3 +30,10 @@ mat-error {
     display: block;
     margin: auto;
 }
+
+@media only screen and (min-width: 1000px) {
+  .verticalWrapper {
+    max-width: 50%;
+    margin: auto;
+  }
+}
