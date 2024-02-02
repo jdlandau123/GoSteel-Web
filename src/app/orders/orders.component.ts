@@ -6,11 +6,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleService } from '../services/title.service';
 import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
-import { BehaviorSubject, filter, forkJoin } from 'rxjs';
+import { BehaviorSubject, Observable, filter, forkJoin, startWith, map } from 'rxjs';
 import { DeleteConfirmationDialogComponent } from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { OrderDialogComponent } from './order-dialog/order-dialog.component';
 import { ICustomer, IOrder, IOrderPanel } from '../interfaces';
 import { Timestamp, where, orderBy } from 'firebase/firestore';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
 export interface ITableRow {
   id: string;
@@ -40,7 +41,8 @@ export interface ITableRow {
   imports: [
     CommonModule,
     RouterLink,
-    MaterialModule
+    MaterialModule,
+    ReactiveFormsModule
   ],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css']
@@ -49,6 +51,8 @@ export class OrdersComponent implements OnInit {
   orders: BehaviorSubject<IOrder[]> = new BehaviorSubject<IOrder[]>([]);
   tableColumns = ['name', 'date', 'price', 'delete'];
   tableRows: BehaviorSubject<ITableRow[]> = new BehaviorSubject<ITableRow[]>([]);
+  searchInput = new FormControl<string>('');
+  filteredTableRows: Observable<ITableRow[]>;
 
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
               public loadingService: LoadingService, public dialog: MatDialog) {
@@ -57,11 +61,24 @@ export class OrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.buildTableRows();
+
+    this.filteredTableRows = this.searchInput.valueChanges.pipe(
+      startWith(''),
+      map((text: string) => text.toString().toLowerCase()),
+      map((searchText: string) => this.tableRows.value.filter((r: ITableRow) => {
+        return r?.customer?.firstName?.toLowerCase().includes(searchText)
+          || r?.customer?.lastName?.toLowerCase().includes(searchText)
+          || r?.customer?.email?.toLowerCase().includes(searchText)
+          || r?.customer?.phone?.toLowerCase().includes(searchText)
+          || r?.customer?.workPhone?.toLowerCase().includes(searchText)
+          || r?.customer?.companyName?.toLowerCase().includes(searchText)
+      }))
+    );
   }
 
   buildTableRows() {
     forkJoin({
-      orders: this._firebaseService.query<IOrder>('Orders'),
+      orders: this._firebaseService.query<IOrder>('Orders', null, orderBy('dateCreated', 'desc')),
       customers: this._firebaseService.query<ICustomer>('Customers')
     }).subscribe((data: {orders: IOrder[], customers: ICustomer[]}) => {
       const res = [];
@@ -71,18 +88,6 @@ export class OrdersComponent implements OnInit {
       }
       this.tableRows.next(res);
     });
-  }
-
-  sortTable(event: any) {
-    let field;
-    switch (event.active) {
-      case 'name': field = 'lastName'; break;
-      case 'date': field = 'dateCreated'; break;
-      case 'price': field = 'totalPrice'; break;
-      default: break;
-    }
-    const ordering = event.direction === 'desc' ? orderBy(field, 'desc') : orderBy(field);
-    this._firebaseService.query<IOrder>('Orders', null, ordering).subscribe(o => this.orders.next(o));
   }
 
   openOrder(tableRow: ITableRow) {

@@ -3,28 +3,29 @@
         <mat-icon>add</mat-icon> New Order
     </button>
 
+    <mat-form-field style="margin-top: 20px;">
+      <mat-label>Search</mat-label>
+      <input matInput type="text" [formControl]="searchInput" placeholder="Search">
+    </mat-form-field>
+
     <div *ngIf="loadingService.isLoading()" style="display: flex; justify-content: center; margin-top: 20px;">
         <mat-spinner></mat-spinner>
     </div>
 
-    <!-- <mat-form-field appearance="outline" style="margin-top: 20px;">
-        <input matInput type="text" placeholder="Search" [formControl]="searchInput" />
-    </mat-form-field> -->
-
-    <table *ngIf="(tableRows | async).length > 0" mat-table [dataSource]="tableRows | async" matSort
-            (matSortChange)="sortTable($event)" class="mat-elevation-z8" style="margin-top: 20px;">
+    <table *ngIf="(tableRows | async).length > 0" mat-table [dataSource]="filteredTableRows | async"
+            class="mat-elevation-z8">
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <th mat-header-cell *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let element">{{element?.customer?.firstName}} {{element?.customer?.lastName}}</td>
         </ng-container>
 
         <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <th mat-header-cell *matHeaderCellDef>Date</th>
           <td mat-cell *matCellDef="let element">{{element?.dateCreated.toDate() | date : 'shortDate'}}</td>
         </ng-container>
 
         <ng-container matColumnDef="price">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
+          <th mat-header-cell *matHeaderCellDef>Price</th>
           <td mat-cell *matCellDef="let element">{{element?.totalPrice | currency}}</td>
         </ng-container>
 
