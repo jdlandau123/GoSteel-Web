@@ -22,5 +22,5 @@ export const routes: Routes = [
     { component: OrdersComponent, path: '', canActivate: [allowRoute] },
     { component: OrdersComponent, path: 'orders', canActivate: [allowRoute] },
     { component: NewOrderComponent, path: 'new-order', canActivate: [allowRoute] },
-    { component: ItemTemplatesComponent, path: 'item-templates', canActivate: [allowRoute] },
+    { component: ItemTemplatesComponent, path: 'items', canActivate: [allowRoute] },
 ];

@@ -6,13 +6,34 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleService } from '../services/title.service';
 import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
-import { BehaviorSubject, filter, debounceTime } from 'rxjs';
+import { BehaviorSubject, Observable, filter, forkJoin, startWith, map } from 'rxjs';
 import { DeleteConfirmationDialogComponent } from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { OrderDialogComponent } from './order-dialog/order-dialog.component';
-import { IOrder, IOrderPanel } from '../interfaces';
-import { Timestamp, where, orderBy, or, and } from 'firebase/firestore';
-import { ReactiveFormsModule } from '@angular/forms';
-import { FormControl } from '@angular/forms';
+import { ICustomer, IOrder, IOrderPanel } from '../interfaces';
+import { Timestamp, where, orderBy } from 'firebase/firestore';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+
+export interface ITableRow {
+  id: string;
+  customerId: string;
+  showId: string;
+  dateCreated: Timestamp;
+  datePaid: Timestamp;
+  dateCompleted: Timestamp;
+  totalPrice: number;
+  notes: string;
+  standColor: string;
+  customer: {
+    id: string;
+    firstName: string;
+    lastName:string;
+    email: string;
+    phone: string;
+    workPhone: string;
+    companyName: string;
+    businessType: string;
+  }
+}
 
 @Component({
   selector: 'app-orders',
@@ -29,50 +50,49 @@ import { FormControl } from '@angular/forms';
 export class OrdersComponent implements OnInit {
   orders: BehaviorSubject<IOrder[]> = new BehaviorSubject<IOrder[]>([]);
   tableColumns = ['name', 'date', 'price', 'delete'];
-  // searchInput = new FormControl(null);
-  
+  tableRows: BehaviorSubject<ITableRow[]> = new BehaviorSubject<ITableRow[]>([]);
+  searchInput = new FormControl<string>('');
+  filteredTableRows: Observable<ITableRow[]>;
+
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
               public loadingService: LoadingService, public dialog: MatDialog) {
     this._titleService.title.set('Orders');
   }
 
   ngOnInit(): void {
-    // this.searchInput.valueChanges.pipe(
-    //   debounceTime(500)
-    // ).subscribe(search => {
-    //   const w = or(   
-    //     where('lastName', '>=', search),
-    //     where('lastName', '<=', search + "\uf8ff"),
-    //     where('email', '==', search),
-    //     where('phone', '==', search)
-    //   );
-    //   this._firebaseService.query<IOrder>('Orders', w).subscribe(o => this.orders.next(o));
-    // })
-    this._firebaseService.query<IOrder>('Orders').subscribe(o => this.orders.next(o));
+    this.buildTableRows();
+
+    this.filteredTableRows = this.searchInput.valueChanges.pipe(
+      startWith(''),
+      map((text: string) => text.toString().toLowerCase()),
+      map((searchText: string) => this.tableRows.value.filter((r: ITableRow) => {
+        return r?.customer?.firstName?.toLowerCase().includes(searchText)
+          || r?.customer?.lastName?.toLowerCase().includes(searchText)
+          || r?.customer?.email?.toLowerCase().includes(searchText)
+          || r?.customer?.phone?.toLowerCase().includes(searchText)
+          || r?.customer?.workPhone?.toLowerCase().includes(searchText)
+          || r?.customer?.companyName?.toLowerCase().includes(searchText)
+      }))
+    );
   }
 
-  timestampToDate(timestamp: Timestamp): Date {
-    if (!timestamp) return null;
-    return new Date(timestamp.seconds * 1000);
-  }
-
-  sortTable(event: any) {
-    let field;
-    switch (event.active) {
-      case 'name': field = 'lastName'; break;
-      case 'date': field = 'dateCreated'; break;
-      case 'price': field = 'totalPrice'; break;
-      default: break;
-    }
-    const ordering = event.direction === 'desc' ? orderBy(field, 'desc') : orderBy(field);
-    this._firebaseService.query<IOrder>('Orders', null, ordering).subscribe(o => this.orders.next(o));
-  }
-
-  openOrder(order: IOrder) {
-    this.dialog.open(OrderDialogComponent, {
-      data: {
-        order
+  buildTableRows() {
+    forkJoin({
+      orders: this._firebaseService.query<IOrder>('Orders', null, orderBy('dateCreated', 'desc')),
+      customers: this._firebaseService.query<ICustomer>('Customers')
+    }).subscribe((data: {orders: IOrder[], customers: ICustomer[]}) => {
+      const res = [];
+      for (let order of data.orders) {
+        const customer = data.customers.find(c => c.id === order.customerId);
+        res.push({customer, ...order});
       }
+      this.tableRows.next(res);
+    });
+  }
+
+  openOrder(tableRow: ITableRow) {
+    this.dialog.open(OrderDialogComponent, {
+      data: { tableRow }
     });
   }
 
@@ -91,7 +111,9 @@ export class OrdersComponent implements OnInit {
             this._firebaseService.deleteItem('OrderPanels', panel.id);
           })
         })
-        this._firebaseService.query<IOrder>('Orders').subscribe(o => this.orders.next(o));
+        // this.buildTableRows();
+        // faster to do this on the front end and skip rebuilding the whole data source
+        this.tableRows.next(this.tableRows.value.filter(r => r.id !== order.id));
       }
     });
   }

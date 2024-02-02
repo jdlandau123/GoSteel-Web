@@ -1,17 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../material.module';
-import {
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-} from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ItemTemplateDialogComponent } from './item-template-dialog/item-template-dialog.component';
 import { FirebaseService } from '../services/firebase.service';
 import { TitleService } from '../services/title.service';
 import { LoadingService } from '../services/loading.service';
-import { IItemTemplate } from '../interfaces';
+import { IItem } from '../interfaces';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -19,40 +14,33 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    MaterialModule,
-    ReactiveFormsModule
+    MaterialModule
   ],
   templateUrl: './item-templates.component.html',
   styleUrls: ['./item-templates.component.css']
 })
 export class ItemTemplatesComponent implements OnInit {
-  itemTemplates: Observable<IItemTemplate[]>;
-  itemTemplateForm = new FormGroup({
-    category: new FormControl<string>(null),
-    pricePerUnit: new FormControl<number>(null),
-    unitCount: new FormControl<number>(null),
-    hooks: new FormControl<number>(null),
-    color: new FormControl<string>(null),
-    description: new FormControl<string>(null)
-  });
+  items: Observable<IItem[]>;
 
   constructor(private _firebaseService: FirebaseService, private _titleService: TitleService,
               public loadingService: LoadingService, public dialog: MatDialog) {
-    this._titleService.title.set('Item Templates');
+    this._titleService.title.set('Items');
   }
 
   ngOnInit(): void {
-    this.itemTemplates = this._firebaseService.query('ItemTemplates');
+    this.items = this._firebaseService.query('Items');
   }
 
-  openDialog(type: 'Add' | 'Edit', item: IItemTemplate = null) {
+  openDialog(type: 'Add' | 'Edit', item: IItem = null) {
     this.dialog.open(ItemTemplateDialogComponent, {
       data: {
         type,
         item
       }
-    }).afterClosed().subscribe(() => {
-      this.itemTemplates = this._firebaseService.query('ItemTemplates');
+    }).afterClosed().subscribe(result => {
+      if (result !== 'cancelled') {
+        this.items = this._firebaseService.query('Items');
+      }
     });
   }
 

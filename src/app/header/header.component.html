@@ -1,5 +1,5 @@
 <mat-toolbar color="primary">
-    <span>GoSteel - {{titleService.title()}}</span>
+    <span>GoSteel Gift Orders - {{titleService.title()}}</span>
     <span class="spacer"></span>
     <button mat-icon-button aria-label="menu icon" [matMenuTriggerFor]="menu">
         <mat-icon>menu</mat-icon>
@@ -8,19 +8,19 @@
   <mat-menu #menu="matMenu">
     <button mat-menu-item [routerLink]="'/new-order'">New Order</button>
     <button mat-menu-item [routerLink]="'/orders'">Orders</button>
-    <button mat-menu-item [routerLink]="'/item-templates'">Item Templates</button>
+    <button mat-menu-item [routerLink]="'/items'">Items</button>
 
     <mat-divider></mat-divider>
 
     <div *ngIf="firebaseService.isLoggedIn()" class="verticalWrapper">
         <p>{{ (firebaseService.user | async)?.email }}</p>
         <button mat-raised-button color="primary" (click)="firebaseService.logOut()">
-            Log out
+            Log Out
         </button>
     </div>
     <div *ngIf="!firebaseService.isLoggedIn()" class="verticalWrapper">
         <button mat-raised-button color="primary" [routerLink]="'/login'">
-            Log in
+            Log In
         </button>
     </div>
 </mat-menu>

@@ -1,20 +1,17 @@
 <div class="verticalWrapper">
     <button mat-fab extended color="primary" (click)="openDialog('Add')">
-        <mat-icon>add</mat-icon> Add Item Template
+        <mat-icon>add</mat-icon> Add Item
     </button>
     <div *ngIf="loadingService.isLoading()" style="display: flex; justify-content: center; margin-top: 20px;">
         <mat-spinner></mat-spinner>
     </div>
-    <mat-card *ngFor="let item of (itemTemplates | async)">
+    <mat-card *ngFor="let item of (items | async)">
         <mat-card-header>
-            <mat-card-title style="font-weight: bold;">{{ item?.category }}</mat-card-title>
-            <mat-card-subtitle>{{ item?.description }}</mat-card-subtitle>
+            <!-- <mat-card-title style="font-weight: bold;">{{ item?.category }}</mat-card-title> -->
+            <mat-card-subtitle>{{ item?.name }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content style="display: flex; justify-content: space-between;">
-            <p>${{ item?.pricePerUnit }}/unit</p>
-            <p>x{{ item?.unitCount }}</p>
-            <p>{{ item?.hooks }} hooks</p>
-            <p>{{ item?.color }}</p>
+            <p>{{ item?.pricePerUnit | currency }}/unit</p>
         </mat-card-content>
         <mat-card-actions style="display: flex; justify-content: flex-end;">
             <button mat-icon-button aria-label="Edit button" (click)="openDialog('Edit', item)">

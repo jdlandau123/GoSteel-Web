@@ -8,14 +8,14 @@ import {
   FormControl,
   Validators
 } from '@angular/forms';
-import { IItemTemplate } from 'src/app/interfaces';
+import { IItem } from 'src/app/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { DeleteConfirmationDialogComponent } from 'src/app/delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { filter } from 'rxjs';
 
 interface IDialogData {
   type: 'Add' | 'Edit',
-  item?: IItemTemplate
+  item?: IItem
 }
 
 @Component({
@@ -30,14 +30,11 @@ interface IDialogData {
   styleUrls: ['./item-template-dialog.component.css']
 })
 export class ItemTemplateDialogComponent implements OnInit {
-  itemTemplateForm = new FormGroup({
-    category: new FormControl<string>(null, Validators.required),
+  itemForm = new FormGroup({
+    id: new FormControl<string>(null),
+    name: new FormControl<string>(null, Validators.required),
     pricePerUnit: new FormControl<number>(1, Validators.required),
-    unitCount: new FormControl<number>(24, Validators.required),
-    hooks: new FormControl<number>(0, Validators.required),
-    color: new FormControl<string>(null),
-    description: new FormControl<string>(null),
-  })
+  });
 
   constructor(public dialogRef: MatDialogRef<ItemTemplateDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: IDialogData,
@@ -46,26 +43,30 @@ export class ItemTemplateDialogComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.data.item) {
-      this.itemTemplateForm.patchValue(this.data.item);
+      this.itemForm.patchValue(this.data.item);
     }
   }
 
   async save() {
-    if (this.data?.item) await this._firebaseService.updateItem('ItemTemplates', this.data.item.id, this.itemTemplateForm.value);
-    else await this._firebaseService.createItem('ItemTemplates', this.itemTemplateForm.value);
+    if (this.itemForm.value.id) {
+      await this._firebaseService.updateItem('Items', this.data.item.id, this.itemForm.value);
+    } else {
+      delete this.itemForm.value.id; // this stops firebase from creating a duplicate
+      await this._firebaseService.createItem('Items', this.itemForm.value);
+    }
     this.dialogRef.close();
   }
 
   async delete() {
     this._dialog.open(DeleteConfirmationDialogComponent, {
       data: {
-        itemType: 'Item Template'
+        itemType: 'Item'
       }
     }).afterClosed().pipe(
       filter(r => r)
     ).subscribe(async (confirmed: boolean) => {
       if (confirmed) {
-        await this._firebaseService.deleteItem('ItemTemplates', this.data?.item.id);
+        await this._firebaseService.deleteItem('Items', this.data?.item.id);
         this.dialogRef.close();
       }
     })
