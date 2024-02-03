@@ -31,6 +31,13 @@ mat-error {
     margin: auto;
 }
 
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 @media only screen and (min-width: 1000px) {
   .verticalWrapper {
     max-width: 50%;

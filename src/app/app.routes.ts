@@ -1,10 +1,10 @@
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
-import { NewOrderComponent } from './new-order/new-order.component';
 import { OrdersComponent } from './orders/orders.component';
 import { ItemTemplatesComponent } from './item-templates/item-templates.component';
 import { FirebaseService } from './services/firebase.service';
+import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
 
 function allowRoute() {
     const firebaseService = inject(FirebaseService);
@@ -21,6 +21,7 @@ export const routes: Routes = [
     { component: LoginComponent, path: 'login' },
     { component: OrdersComponent, path: '', canActivate: [allowRoute] },
     { component: OrdersComponent, path: 'orders', canActivate: [allowRoute] },
-    { component: NewOrderComponent, path: 'new-order', canActivate: [allowRoute] },
+    { component: OrderDetailComponent, path: 'orders/:id', canActivate: [allowRoute] },
+    { component: OrderDetailComponent, path: 'orders/new', canActivate: [allowRoute] },
     { component: ItemTemplatesComponent, path: 'items', canActivate: [allowRoute] },
 ];
