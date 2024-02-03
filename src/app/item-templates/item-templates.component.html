@@ -2,7 +2,7 @@
     <button mat-fab extended color="primary" (click)="openDialog('Add')">
         <mat-icon>add</mat-icon> Add Item
     </button>
-    <div *ngIf="loadingService.isLoading()" style="display: flex; justify-content: center; margin-top: 20px;">
+    <div *ngIf="loadingService.isLoading()" class="loadingContainer">
         <mat-spinner></mat-spinner>
     </div>
     <mat-card *ngFor="let item of (items | async)">

@@ -1,12 +1,12 @@
 <mat-toolbar color="primary">
-    <span>GoSteel Gift Orders - {{titleService.title()}}</span>
+    <span>{{titleService.title()}}</span>
     <span class="spacer"></span>
     <button mat-icon-button aria-label="menu icon" [matMenuTriggerFor]="menu">
         <mat-icon>menu</mat-icon>
     </button>
   </mat-toolbar>
   <mat-menu #menu="matMenu">
-    <button mat-menu-item [routerLink]="'/new-order'">New Order</button>
+    <button mat-menu-item [routerLink]="'/orders/new'">New Order</button>
     <button mat-menu-item [routerLink]="'/orders'">Orders</button>
     <button mat-menu-item [routerLink]="'/items'">Items</button>
 

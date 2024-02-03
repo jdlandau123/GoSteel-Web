@@ -8,7 +8,6 @@ import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
 import { BehaviorSubject, Observable, filter, forkJoin, startWith, map } from 'rxjs';
 import { DeleteConfirmationDialogComponent } from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
-import { OrderDialogComponent } from './order-dialog/order-dialog.component';
 import { ICustomer, IOrder, IOrderPanel } from '../interfaces';
 import { Timestamp, where, orderBy } from 'firebase/firestore';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -56,7 +55,7 @@ export class OrdersComponent implements OnInit {
 
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
               public loadingService: LoadingService, public dialog: MatDialog) {
-    this._titleService.title.set('Orders');
+    this._titleService.title.set('GoSteel Gift Orders');
   }
 
   ngOnInit(): void {
@@ -87,12 +86,6 @@ export class OrdersComponent implements OnInit {
         res.push({customer, ...order});
       }
       this.tableRows.next(res);
-    });
-  }
-
-  openOrder(tableRow: ITableRow) {
-    this.dialog.open(OrderDialogComponent, {
-      data: { tableRow }
     });
   }
 
