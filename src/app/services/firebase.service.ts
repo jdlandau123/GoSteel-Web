@@ -17,6 +17,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   QueryOrderByConstraint,
@@ -124,6 +125,16 @@ export class FirebaseService {
   }
 
   async createItem(collectionName: string, object: any) {
+    // const newDocRef = doc(collection(this.db, collectionName));
+    // console.log(newDocRef.id);
+    // await setDoc(
+    //   newDocRef,
+    //   {
+    //     id: newDocRef.id,
+    //     ...object
+    //   }
+    // )
+    // return newDocRef;
     return await addDoc(collection(this.db, collectionName), object);
   }
 

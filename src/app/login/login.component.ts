@@ -28,6 +28,6 @@ export class LoginComponent {
   })
 
   constructor(public firebaseService: FirebaseService, private _titleService: TitleService) {
-    this._titleService.title.set('Login');
+    this._titleService.title.set('GoSteel Gift Orders - Login');
   }
 }
