@@ -1,0 +1,23 @@
+<h1 mat-dialog-title>Set Current Show</h1>
+
+<div mat-dialog-content>
+  <form [formGroup]="showForm">
+    <mat-form-field appearance="outline" style="margin-top: 10px;">
+      <mat-label>Show Name</mat-label>
+      <input type="text" matInput formControlName="name" placeholder="Show Name">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Start Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="startDate">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions style="display: flex; justify-content: space-around;">
+    <button mat-raised-button color="primary" [disabled]="!showForm.valid" (click)="save()">
+        Save
+    </button>
+    <button mat-raised-button color="accent" (click)="dialogRef.close(null)">Cancel</button>
+</div>
