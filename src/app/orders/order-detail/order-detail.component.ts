@@ -95,7 +95,6 @@ export class OrderDetailComponent implements OnInit {
   customers: BehaviorSubject<ICustomer[]> = new BehaviorSubject<ICustomer[]>([]);
   filteredCustomers: Observable<ICustomer[]>;
   customerSearch = new FormControl<string>('');
-  isExistingCustomer = false;
   isDesktop = false;
 
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
@@ -116,6 +115,9 @@ export class OrderDetailComponent implements OnInit {
           for (let form of [this.orderForm, this.customerForm, this.billingAddressForm, this.shippingAddressForm]) {
             form.reset();
           }
+          this.orderForm.controls.dateCreated.setValue(new Date());
+          this.shippingAddressForm.controls.type.setValue('shipping');
+          this.billingAddressForm.controls.type.setValue('billing');
         } else {
           this._titleService.title.set('Review Order');
           this.isNewOrder = false;
@@ -154,8 +156,8 @@ export class OrderDetailComponent implements OnInit {
       startWith(''),
       map((input: string) => input.toString().toLowerCase()),
       map((searchText: string) => this.customers.value.filter((c: ICustomer) => {
-        return c?.firstName.toLowerCase()?.includes(searchText) || c?.lastName.toLowerCase()?.includes(searchText)
-          || c?.email.toLowerCase()?.includes(searchText) || c?.phone?.includes(searchText)
+        return c?.firstName?.toLowerCase()?.includes(searchText) || c?.lastName?.toLowerCase()?.includes(searchText)
+          || c?.email?.toLowerCase()?.includes(searchText) || c?.phone?.includes(searchText)
           || c?.workPhone?.includes(searchText) || c?.companyName?.includes(searchText);
       }))
     );
@@ -300,16 +302,19 @@ export class OrderDetailComponent implements OnInit {
     let customerId = this.customerForm.value.id;
     try {
       if (!this.customerForm.value.id) { // only existing customers will have an id
+        delete this.customerForm.value.id;
         const customer = await this._firebaseService.createItem('Customers', this.customerForm.value);
         customerId = customer.id;
       }
       if (!this.shippingAddressForm.value.id && this.shippingAddressForm.value.streetAddress) {
+        delete this.shippingAddressForm.value.id;
         await this._firebaseService.createItem('Addresses', {
           customerId: customerId,
           ...this.shippingAddressForm.value
         });
       }
       if (!this.billingAddressForm.value.id && this.billingAddressForm.value.streetAddress) {
+        delete this.billingAddressForm.value.id;
         await this._firebaseService.createItem('Addresses', {
           customerId: customerId,
           ...this.billingAddressForm.value

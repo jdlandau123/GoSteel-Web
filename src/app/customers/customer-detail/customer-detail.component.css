@@ -1,0 +1,8 @@
+mat-card {
+  width: 100%;
+  margin-top: 20px;
+}
+
+mat-expansion-panel {
+  margin-bottom: 20px;
+}

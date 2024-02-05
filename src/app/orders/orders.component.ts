@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleService } from '../services/title.service';
 import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
-import { BehaviorSubject, Observable, filter, forkJoin, startWith, map } from 'rxjs';
+import { BehaviorSubject, Observable, filter, forkJoin, startWith, map, window } from 'rxjs';
 import { DeleteConfirmationDialogComponent } from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { ICustomer, IOrder, IOrderPanel } from '../interfaces';
 import { Timestamp, where, orderBy } from 'firebase/firestore';
@@ -47,7 +47,6 @@ export interface ITableRow {
   styleUrls: ['./orders.component.css']
 })
 export class OrdersComponent implements OnInit {
-  orders: BehaviorSubject<IOrder[]> = new BehaviorSubject<IOrder[]>([]);
   tableColumns = ['name', 'date', 'price', 'delete'];
   tableRows: BehaviorSubject<ITableRow[]> = new BehaviorSubject<ITableRow[]>([]);
   searchInput = new FormControl<string>('');
@@ -86,6 +85,7 @@ export class OrdersComponent implements OnInit {
         res.push({customer, ...order});
       }
       this.tableRows.next(res);
+      this.searchInput.setValue('');
     });
   }
 
@@ -107,6 +107,7 @@ export class OrdersComponent implements OnInit {
         // this.buildTableRows();
         // faster to do this on the front end and skip rebuilding the whole data source
         this.tableRows.next(this.tableRows.value.filter(r => r.id !== order.id));
+        this.searchInput.setValue('');
       }
     });
   }
