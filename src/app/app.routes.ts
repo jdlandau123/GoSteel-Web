@@ -6,6 +6,7 @@ import { ItemTemplatesComponent } from './item-templates/item-templates.componen
 import { FirebaseService } from './services/firebase.service';
 import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
 import { CustomersComponent } from './customers/customers.component';
+import { CustomerDetailComponent } from './customers/customer-detail/customer-detail.component';
 
 function allowRoute() {
     const firebaseService = inject(FirebaseService);
@@ -26,4 +27,5 @@ export const routes: Routes = [
     { component: OrderDetailComponent, path: 'orders/new', canActivate: [allowRoute] },
     { component: ItemTemplatesComponent, path: 'items', canActivate: [allowRoute] },
     { component: CustomersComponent, path: 'customers', canActivate: [allowRoute] },
+    { component: CustomerDetailComponent, path: 'customers/:id', canActivate: [allowRoute] },
 ];

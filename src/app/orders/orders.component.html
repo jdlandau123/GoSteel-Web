@@ -41,4 +41,5 @@
     <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: tableColumns;" [routerLink]="['/orders', row.id]"></tr>
   </table>
+  <p *ngIf="(tableRows | async)?.length === 0">No Orders</p>
 </div>

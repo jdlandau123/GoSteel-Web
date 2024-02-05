@@ -116,6 +116,8 @@ export class OrderDetailComponent implements OnInit {
             form.reset();
           }
           this.orderForm.controls.dateCreated.setValue(new Date());
+          this.shippingAddressForm.controls.type.setValue('shipping');
+          this.billingAddressForm.controls.type.setValue('billing');
         } else {
           this._titleService.title.set('Review Order');
           this.isNewOrder = false;
@@ -305,12 +307,14 @@ export class OrderDetailComponent implements OnInit {
         customerId = customer.id;
       }
       if (!this.shippingAddressForm.value.id && this.shippingAddressForm.value.streetAddress) {
+        delete this.shippingAddressForm.value.id;
         await this._firebaseService.createItem('Addresses', {
           customerId: customerId,
           ...this.shippingAddressForm.value
         });
       }
       if (!this.billingAddressForm.value.id && this.billingAddressForm.value.streetAddress) {
+        delete this.billingAddressForm.value.id;
         await this._firebaseService.createItem('Addresses', {
           customerId: customerId,
           ...this.billingAddressForm.value
