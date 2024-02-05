@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TitleService } from '../services/title.service';
@@ -9,6 +9,8 @@ import { ICustomer } from '../interfaces';
 import { MaterialModule } from '../material.module';
 import { orderBy } from 'firebase/firestore';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-customers',
@@ -27,10 +29,13 @@ export class CustomersComponent implements OnInit {
   tableColumns = ['firstName', 'lastName', 'companyName'];
   search = new FormControl<string>('');
   filteredCustomers: Observable<ICustomer[]>;
+  tableDatasource: MatTableDataSource<ICustomer>;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
               public loadingService: LoadingService) {
     this._titleService.title.set('Customers');
+    this.tableDatasource = new MatTableDataSource();
   }
 
   ngOnInit(): void {
@@ -48,5 +53,12 @@ export class CustomersComponent implements OnInit {
           || c?.companyName?.toLowerCase().includes(searchText)
       }))
     );
+
+    this.filteredCustomers.subscribe(customers => this.tableDatasource.data = customers);
   }
+
+  ngAfterViewInit(): void {
+    this.tableDatasource.paginator = this.paginator;
+  }
+
 }

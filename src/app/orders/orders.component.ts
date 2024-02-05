@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MaterialModule } from '../material.module';
@@ -6,11 +6,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleService } from '../services/title.service';
 import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
-import { BehaviorSubject, Observable, filter, forkJoin, startWith, map, window } from 'rxjs';
+import { BehaviorSubject, Observable, filter, forkJoin, startWith, map, tap } from 'rxjs';
 import { DeleteConfirmationDialogComponent } from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { ICustomer, IOrder, IOrderPanel } from '../interfaces';
 import { Timestamp, where, orderBy } from 'firebase/firestore';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 
 export interface ITableRow {
   id: string;
@@ -46,15 +48,18 @@ export interface ITableRow {
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css']
 })
-export class OrdersComponent implements OnInit {
+export class OrdersComponent implements OnInit, AfterViewInit {
   tableColumns = ['name', 'date', 'price', 'delete'];
   tableRows: BehaviorSubject<ITableRow[]> = new BehaviorSubject<ITableRow[]>([]);
   searchInput = new FormControl<string>('');
   filteredTableRows: Observable<ITableRow[]>;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  tableDatasource: MatTableDataSource<ITableRow>;
 
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
               public loadingService: LoadingService, public dialog: MatDialog) {
     this._titleService.title.set('GoSteel Gift Orders');
+    this.tableDatasource = new MatTableDataSource();
   }
 
   ngOnInit(): void {
@@ -72,6 +77,12 @@ export class OrdersComponent implements OnInit {
           || r?.customer?.companyName?.toLowerCase().includes(searchText)
       }))
     );
+
+    this.filteredTableRows.subscribe(rows => this.tableDatasource.data = rows);
+  }
+
+  ngAfterViewInit(): void {
+    this.tableDatasource.paginator = this.paginator;
   }
 
   buildTableRows() {
