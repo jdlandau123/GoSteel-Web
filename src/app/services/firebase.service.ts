@@ -17,12 +17,15 @@ import {
   getDoc,
   getDocs,
   addDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
-  QueryOrderByConstraint,
-  Timestamp,
+  QueryOrderByConstraint
 } from "firebase/firestore";
+import {
+  getStorage,
+  ref,
+  uploadBytes
+} from "firebase/storage";
 import { BehaviorSubject, tap } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { LoadingService } from './loading.service';
@@ -38,12 +41,14 @@ export class FirebaseService {
   auth: any;
   user: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   isLoggedIn = signal(false);
+  storage: any;
 
   constructor(private _router: Router, private _loadingService: LoadingService) {
     this.firebaseApp.subscribe(app => {
       if (app) {
         this.firebaseAnalytics = getAnalytics(app);
         this.db = getFirestore(app);
+        this.storage = getStorage();
       }
     });
 
@@ -147,4 +152,10 @@ export class FirebaseService {
     return await deleteDoc(doc(this.db, collectionName, itemId));
   }
 
+  // storage bucket
+  async uploadDocument(fileName: string, file: any) {
+    const bucketRef = ref(this.storage, fileName);
+    const snapshot = await uploadBytes(bucketRef, file);
+    return snapshot;
+  }
 }

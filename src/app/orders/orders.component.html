@@ -1,7 +1,12 @@
 <div class="verticalWrapper">
-  <button mat-fab extended color="primary" class="btnCenter" [routerLink]="'/orders/new'">
-    <mat-icon>add</mat-icon> New Order
-  </button>
+  <div style="display: flex; justify-content: space-around; margin: 10px 0; width: 100%;">
+    <button mat-raised-button color="primary" [routerLink]="'/orders/new'">
+      <mat-icon>add</mat-icon> New Order
+    </button>
+    <button mat-raised-button color="accent" (click)="generateInvoices()" [disabled]="selection.selected.length === 0">
+      Generate Invoices
+    </button>
+  </div>
 
   <mat-form-field style="margin-top: 20px;">
     <mat-label>Search</mat-label>
@@ -14,6 +19,23 @@
 
   <table *ngIf="(tableRows | async).length > 0" mat-table [dataSource]="tableDatasource"
           class="mat-elevation-z8" style="margin-bottom: 10px;">
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox color="primary"
+                      (change)="$event ? toggleAllRows() : null"
+                      [checked]="selection.hasValue() && isAllSelected()"
+                      [indeterminate]="selection.hasValue() && !isAllSelected()">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox color="primary"
+                      (click)="$event.stopPropagation()"
+                      (change)="$event ? selection.toggle(row) : null"
+                      [checked]="selection.isSelected(row)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>Name</th>
       <td mat-cell *matCellDef="let element">{{element?.customer?.firstName}} {{element?.customer?.lastName}}</td>
@@ -29,14 +51,14 @@
       <td mat-cell *matCellDef="let element">{{element?.totalPrice | currency}}</td>
     </ng-container>
 
-    <ng-container matColumnDef="delete">
-      <th mat-header-cell *matHeaderCellDef>Delete</th>
-      <td mat-cell *matCellDef="let element">
-        <button mat-icon-button (click)="$event.stopPropagation(); deleteOrder(element)">
-          <mat-icon color="warn">delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+    <!-- <ng-container matColumnDef="delete"> -->
+    <!--   <th mat-header-cell *matHeaderCellDef>Delete</th> -->
+    <!--   <td mat-cell *matCellDef="let element"> -->
+    <!--     <button mat-icon-button (click)="$event.stopPropagation(); deleteOrder(element)"> -->
+    <!--       <mat-icon color="warn">delete</mat-icon> -->
+    <!--     </button> -->
+    <!--   </td> -->
+    <!-- </ng-container> -->
 
     <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: tableColumns;" [routerLink]="['/orders', row.id]"></tr>
