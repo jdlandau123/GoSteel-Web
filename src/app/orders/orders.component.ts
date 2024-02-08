@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleService } from '../services/title.service';
 import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
-import { BehaviorSubject, Observable, forkJoin, startWith, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, startWith, map } from 'rxjs';
 import { ICustomer, IOrder } from '../interfaces';
 import { Timestamp, orderBy } from 'firebase/firestore';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -132,6 +132,7 @@ export class OrdersComponent implements OnInit, AfterViewInit {
     }
     this._snackBar.open('Generating Invoices');
     this.buildTableRows();
+    this.selection = new SelectionModel<ITableRow>(true, []);
   }
 
 }
