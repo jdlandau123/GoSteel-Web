@@ -11,7 +11,7 @@ import {
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatDialog } from '@angular/material/dialog';
 import { TitleService } from '../../services/title.service';
-import { IAddress, ICustomer, IItemTemplate, IOrderPanel, IShow } from '../../interfaces';
+import { IAddress, ICustomer, IItemTemplate, IOrder, IOrderPanel, IShow } from '../../interfaces';
 import { BehaviorSubject, Observable, filter, map, startWith, tap } from 'rxjs';
 import { SelectItemDialogComponent } from '../select-item-dialog/select-item-dialog.component';
 import { FirebaseService } from '../../services/firebase.service';
@@ -20,6 +20,8 @@ import { where, orderBy } from 'firebase/firestore';
 import { UpdateShowDialogComponent } from '../../update-show-dialog/update-show-dialog.component';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DeleteConfirmationDialogComponent } from '../../delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { InvoiceService} from '../../services/invoice.service';
 
 export interface IPanel {
   id?: string;
@@ -57,9 +59,10 @@ export class OrderDetailComponent implements OnInit {
     standColor: new FormControl<string>(null),
     dateCreated: new FormControl<Date>(new Date()),
     datePaid: new FormControl<Date>(null),
-    dateCompleted: new FormControl<Date>(null),
+    dateShipped: new FormControl<Date>(null),
     totalPrice: new FormControl<number>(0, Validators.required),
     notes: new FormControl<string>(null),
+    hasInvoice: new FormControl<boolean>(false)
   });
   shippingAddressForm = new FormGroup({
     id: new FormControl<string>(null),
@@ -96,10 +99,12 @@ export class OrderDetailComponent implements OnInit {
   filteredCustomers: Observable<ICustomer[]>;
   customerSearch = new FormControl<string>('');
   isDesktop = false;
+  invoiceService: InvoiceService
 
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
               public dialog: MatDialog, private _router: Router, public loadingService: LoadingService,
               private _snackbar: MatSnackBar, private _route: ActivatedRoute) {
+    this.invoiceService = new InvoiceService(this._firebaseService);
   }
 
   async ngOnInit() {
@@ -115,7 +120,7 @@ export class OrderDetailComponent implements OnInit {
           for (let form of [this.orderForm, this.customerForm, this.billingAddressForm, this.shippingAddressForm]) {
             form.reset();
           }
-          this.orderForm.controls.dateCreated.setValue(new Date());
+          this.orderForm.patchValue({dateCreated: new Date(), hasInvoice: false});
           this.shippingAddressForm.controls.type.setValue('shipping');
           this.billingAddressForm.controls.type.setValue('billing');
         } else {
@@ -134,7 +139,7 @@ export class OrderDetailComponent implements OnInit {
       this.loadingService.isLoading.set(true);
       const order = await this._firebaseService.getItem('Orders', this.id);
       order['datePaid'] = order['datePaid']?.toDate();
-      order['dateCompleted'] = order['dateCompleted']?.toDate();
+      order['dateShipped'] = order['dateShipped']?.toDate();
       this.orderForm.patchValue(order);
       const show = await this._firebaseService.getItem('Shows', order['showId']);
       this.currentShow.next(show as IShow);
@@ -270,6 +275,26 @@ export class OrderDetailComponent implements OnInit {
     this.panels = panelsFiltered;
   }
 
+  deleteOrder() {
+    this.dialog.open(DeleteConfirmationDialogComponent, {
+      data: {
+        itemType: 'Order'
+      }
+    }).afterClosed().pipe(
+      filter(r => r)
+    ).subscribe(async (confirmed: boolean) => {
+      if (confirmed) {
+        await this._firebaseService.deleteItem('Orders', this.id);
+        this._firebaseService.query<IOrderPanel>('OrderPanels', where('orderId', '==', this.id)).subscribe(panels => {
+          panels.forEach(panel => {
+            this._firebaseService.deleteItem('OrderPanels', panel.id);
+          })
+        })
+        this._router.navigateByUrl('/orders');
+      }
+    });
+  }
+
   calculateOrderTotal(): number {
     let total = 0;
     this.panels.forEach(panel => {
@@ -286,6 +311,8 @@ export class OrderDetailComponent implements OnInit {
     this.loadingService.isLoading.set(true);
     if (this.id && !this.isNewOrder) {
       this.orderForm.patchValue({ totalPrice: this.calculateOrderTotal() });
+      if (!this.orderForm.value.datePaid) this.orderForm.controls.datePaid.setValue(null);
+      if (!this.orderForm.value.dateShipped) this.orderForm.controls.dateShipped.setValue(null);
       await this._firebaseService.updateItem('Orders', this.id, this.orderForm.value);
       this.panels.forEach(panel => {
         panel.packages.map(p => p.unitCount = panel.numPackages.value === 1 ? 144 : 72);
@@ -320,7 +347,7 @@ export class OrderDetailComponent implements OnInit {
           ...this.billingAddressForm.value
         });
       }
-      this.orderForm.patchValue({ totalPrice: this.calculateOrderTotal() });
+      this.orderForm.patchValue({totalPrice: this.calculateOrderTotal(), hasInvoice: false});
       const createdOrder = await this._firebaseService.createItem('Orders', {
         showId: this.currentShow.value.id,
         customerId: customerId,
@@ -340,6 +367,15 @@ export class OrderDetailComponent implements OnInit {
       console.log(error);
       this._snackbar.open('Error saving order, please try again later');
     }
+  }
+
+  createInvoice() {
+    this.invoiceService.createInvoice(this.id);
+    this.orderForm.controls.hasInvoice.setValue(true);
+  }
+
+  downloadInvoice() {
+    this._firebaseService.getInvoice(this.id);
   }
 
 }

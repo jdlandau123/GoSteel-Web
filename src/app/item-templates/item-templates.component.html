@@ -1,5 +1,5 @@
 <div class="verticalWrapper">
-    <button mat-fab extended color="primary" (click)="openDialog('Add')">
+    <button mat-raised-button color="primary" (click)="openDialog('Add')">
         <mat-icon>add</mat-icon> Add Item
     </button>
     <div *ngIf="loadingService.isLoading()" class="loadingContainer">

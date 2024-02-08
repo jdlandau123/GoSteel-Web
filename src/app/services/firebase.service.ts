@@ -24,7 +24,9 @@ import {
 import {
   getStorage,
   ref,
-  uploadBytes
+  uploadBytes,
+  getDownloadURL,
+  getBlob
 } from "firebase/storage";
 import { BehaviorSubject, tap } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
@@ -157,5 +159,11 @@ export class FirebaseService {
     const bucketRef = ref(this.storage, fileName);
     const snapshot = await uploadBytes(bucketRef, file);
     return snapshot;
+  }
+
+  getInvoice(orderId: string) {
+    getDownloadURL(ref(this.storage, `invoices/GoSteel_Order_${orderId}_Invoice.pdf`)).then(url => {
+      window.open(url, '_blank');
+    });
   }
 }

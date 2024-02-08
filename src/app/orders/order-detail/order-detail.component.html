@@ -103,7 +103,21 @@
     </mat-form-field>
   </form>
   <form [formGroup]="orderForm">
-    <p>Order Details</p>
+    <!-- <p>Order Details</p> -->
+    <div *ngIf="id && !isNewOrder" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; gap: 20px; align-items: center;">
+        <p>Invoice Created:</p>
+        <mat-icon color="{{orderForm.value?.hasInvoice ? 'primary' : 'warn'}}">
+          {{orderForm.value?.hasInvoice ? 'check' : 'close'}}
+        </mat-icon>
+      </div>
+      <button *ngIf="orderForm.value?.hasInvoice" mat-raised-button color="primary" (click)="downloadInvoice()">
+        Download Invoice
+      </button>
+      <button *ngIf="!orderForm.value?.hasInvoice" mat-raised-button color="primary" (click)="createInvoice()">
+        Generate Invoice
+      </button>
+    </div>
     <mat-form-field appearance="outline">
       <mat-label>Stand Color</mat-label>
       <mat-select formControlName="standColor">
@@ -119,8 +133,8 @@
       <mat-datepicker #paidDatePicker></mat-datepicker>
     </mat-form-field>
     <mat-form-field appearance="outline">
-      <mat-label>Date Completed</mat-label>
-      <input matInput formControlName="dateCompleted" [matDatepicker]="completedDatePicker">
+      <mat-label>Date Shipped</mat-label>
+      <input matInput formControlName="dateShipped" [matDatepicker]="completedDatePicker">
       <mat-datepicker-toggle matIconSuffix [for]="completedDatePicker"></mat-datepicker-toggle>
       <mat-datepicker #completedDatePicker></mat-datepicker>
     </mat-form-field>
@@ -160,12 +174,15 @@
       </button>
     </div>
   </mat-card>
-  <button mat-fab extended color="primary" class="btnCenter" [disabled]="this.panels.length >= 4"
+  <button mat-raised-button color="accent" class="btnCenter" [disabled]="this.panels.length >= 4"
           (click)="addPanel()" style="margin-top: 10px;">
     <mat-icon>add</mat-icon> Add Panel
   </button>
-  <button mat-fab extended color="primary" (click)="save()" class="btnCenter" style="margin-top: 20px;">
-    <mat-icon>check</mat-icon> Save
+  <button *ngIf="id !== 'new'" mat-raised-button color="warn" class="btnCenter" style="margin-top: 20px;" (click)="deleteOrder()">
+    <mat-icon>delete</mat-icon> Delete Order
+  </button>
+  <button mat-raised-button color="primary" (click)="save()" class="btnCenter" style="margin-top: 20px;">
+    <mat-icon>check</mat-icon> Save Order
   </button>
 </div>
 

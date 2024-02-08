@@ -31,10 +31,11 @@ export interface IOrder {
   showId: string;
   dateCreated: Timestamp;
   datePaid: Timestamp;
-  dateCompleted: Timestamp;
+  dateShipped: Timestamp;
   totalPrice: number;
   notes: string;
   standColor: string;
+  hasInvoice: boolean;
 }
 
 export interface IOrderPanel {
