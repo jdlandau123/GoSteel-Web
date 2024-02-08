@@ -2,3 +2,12 @@
   margin-top: 20px;
   font-size: 14px;
 }
+
+.mat-column-select {
+  max-width: 50px !important;
+  padding-left: 0;
+}
+
+.mat-column-hasInvoice {
+  text-align: center;
+}

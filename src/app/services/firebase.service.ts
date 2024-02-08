@@ -17,15 +17,18 @@ import {
   getDoc,
   getDocs,
   addDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
-  QueryOrderByConstraint,
-  Timestamp,
+  QueryOrderByConstraint
 } from "firebase/firestore";
-import { BehaviorSubject, tap } from 'rxjs';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage"
+import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
-import { LoadingService } from './loading.service';
 import { from, map } from 'rxjs';
 
 @Injectable({
@@ -38,12 +41,14 @@ export class FirebaseService {
   auth: any;
   user: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   isLoggedIn = signal(false);
+  storage: any;
 
-  constructor(private _router: Router, private _loadingService: LoadingService) {
+  constructor(private _router: Router) {
     this.firebaseApp.subscribe(app => {
       if (app) {
         this.firebaseAnalytics = getAnalytics(app);
         this.db = getFirestore(app);
+        this.storage = getStorage();
       }
     });
 
@@ -95,8 +100,6 @@ export class FirebaseService {
   query<T>(collectionName: string, whereClause: any = null, order: QueryOrderByConstraint = null) {
     // where should be a firebase where object
     // order should be a firebase orderBy object
-    this._loadingService.isLoading.set(true);
-
     let q;
     const col = collection(this.db, collectionName);
 
@@ -106,7 +109,6 @@ export class FirebaseService {
     else q = query(col);
 
     return from(getDocs(q)).pipe(
-      tap(() => this._loadingService.isLoading.set(false)),
       map(d => d.docs.map(i => ({id: i.id, ...i.data()}) as T))
     );
   }
@@ -147,4 +149,16 @@ export class FirebaseService {
     return await deleteDoc(doc(this.db, collectionName, itemId));
   }
 
+  // storage bucket
+  async uploadDocument(fileName: string, file: any) {
+    const bucketRef = ref(this.storage, fileName);
+    const snapshot = await uploadBytes(bucketRef, file);
+    return snapshot;
+  }
+
+  getInvoice(orderId: string) {
+    getDownloadURL(ref(this.storage, `invoices/GoSteel_Order_${orderId}_Invoice.pdf`)).then(url => {
+      window.open(url, '_blank');
+    });
+  }
 }

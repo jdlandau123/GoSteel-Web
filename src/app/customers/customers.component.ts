@@ -39,9 +39,11 @@ export class CustomersComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadingService.isLoading.set(true);
     this._firebaseService.query<ICustomer>('Customers', null, orderBy('lastName')).subscribe((customers: ICustomer[]) => {
       this.customers.next(customers);
       this.search.setValue('');
+      this.loadingService.isLoading.set(false);
     });
 
     this.filteredCustomers = this.search.valueChanges.pipe(

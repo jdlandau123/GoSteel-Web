@@ -6,13 +6,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { TitleService } from '../services/title.service';
 import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
-import { BehaviorSubject, Observable, filter, forkJoin, startWith, map, tap } from 'rxjs';
-import { DeleteConfirmationDialogComponent } from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
-import { ICustomer, IOrder, IOrderPanel } from '../interfaces';
-import { Timestamp, where, orderBy } from 'firebase/firestore';
+import { BehaviorSubject, Observable, forkJoin, startWith, map } from 'rxjs';
+import { ICustomer, IOrder } from '../interfaces';
+import { Timestamp, orderBy } from 'firebase/firestore';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { InvoiceService } from '../services/invoice.service';
 
 export interface ITableRow {
   id: string;
@@ -20,10 +22,11 @@ export interface ITableRow {
   showId: string;
   dateCreated: Timestamp;
   datePaid: Timestamp;
-  dateCompleted: Timestamp;
+  dateShipped: Timestamp;
   totalPrice: number;
   notes: string;
   standColor: string;
+  hasInvoice: boolean;
   customer: {
     id: string;
     firstName: string;
@@ -49,20 +52,25 @@ export interface ITableRow {
   styleUrls: ['./orders.component.css']
 })
 export class OrdersComponent implements OnInit, AfterViewInit {
-  tableColumns = ['name', 'date', 'price', 'delete'];
+  tableColumns = ['select', 'name', 'date', 'hasInvoice'];
   tableRows: BehaviorSubject<ITableRow[]> = new BehaviorSubject<ITableRow[]>([]);
   searchInput = new FormControl<string>('');
   filteredTableRows: Observable<ITableRow[]>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   tableDatasource: MatTableDataSource<ITableRow>;
+  selection = new SelectionModel<ITableRow>(true, []);
+  invoiceService: InvoiceService;
 
   constructor(private _titleService: TitleService, private _firebaseService: FirebaseService,
-              public loadingService: LoadingService, public dialog: MatDialog) {
+              public loadingService: LoadingService, public dialog: MatDialog, private _snackBar: MatSnackBar) {
     this._titleService.title.set('GoSteel Gift Orders');
+    this.invoiceService = new InvoiceService(this._firebaseService);
     this.tableDatasource = new MatTableDataSource();
   }
 
   ngOnInit(): void {
+    if (window.innerWidth > 1000) this.tableColumns.splice(-1, 0,'price');
+
     this.buildTableRows();
 
     this.filteredTableRows = this.searchInput.valueChanges.pipe(
@@ -77,7 +85,6 @@ export class OrdersComponent implements OnInit, AfterViewInit {
           || r?.customer?.companyName?.toLowerCase().includes(searchText)
       }))
     );
-
     this.filteredTableRows.subscribe(rows => this.tableDatasource.data = rows);
   }
 
@@ -86,41 +93,50 @@ export class OrdersComponent implements OnInit, AfterViewInit {
   }
 
   buildTableRows() {
+    this.loadingService.isLoading.set(true);
     forkJoin({
       orders: this._firebaseService.query<IOrder>('Orders', null, orderBy('dateCreated', 'desc')),
-      customers: this._firebaseService.query<ICustomer>('Customers')
-    }).subscribe((data: {orders: IOrder[], customers: ICustomer[]}) => {
-      const res = [];
-      for (let order of data.orders) {
-        const customer = data.customers.find(c => c.id === order.customerId);
-        res.push({customer, ...order});
-      }
-      this.tableRows.next(res);
+      customers: this._firebaseService.query<ICustomer>('Customers'),
+    }).pipe(
+      map(data => {
+        const res = [];
+        for (let order of data.orders) {
+          const customer = data.customers.find(c => c.id === order.customerId);
+          res.push({customer, ...order});
+        }
+        return res
+      })
+    ).subscribe((rows: ITableRow[]) => {
+      this.tableRows.next(rows);
       this.searchInput.setValue('');
-    });
+      this.loadingService.isLoading.set(false);
+    })
   }
 
-  deleteOrder(order: IOrder) {
-    this.dialog.open(DeleteConfirmationDialogComponent, {
-      data: {
-        itemType: 'Order'
-      }
-    }).afterClosed().pipe(
-      filter(r => r)
-    ).subscribe(async (confirmed: boolean) => {
-      if (confirmed) {
-        await this._firebaseService.deleteItem('Orders', order.id);
-        this._firebaseService.query<IOrderPanel>('OrderPanels', where('orderId', '==', order.id)).subscribe(panels => {
-          panels.forEach(panel => {
-            this._firebaseService.deleteItem('OrderPanels', panel.id);
-          })
-        })
-        // this.buildTableRows();
-        // faster to do this on the front end and skip rebuilding the whole data source
-        this.tableRows.next(this.tableRows.value.filter(r => r.id !== order.id));
-        this.searchInput.setValue('');
-      }
-    });
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.tableDatasource.data.length;
+    return numSelected === numRows;
+  }
+
+  /** Selects all rows if they are not all selected; otherwise clear selection. */
+  toggleAllRows() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+    this.selection.select(...this.tableDatasource.data);
+  }
+
+  async generateInvoices() {
+    this._snackBar.open('Generating Invoices');
+    for (let row of this.selection.selected) {
+      await this.invoiceService.createInvoice(row.id);
+    }
+    this.buildTableRows();
+    this.selection = new SelectionModel<ITableRow>(true, []);
+    this._snackBar.open('Invoices Generated');
   }
 
 }
+

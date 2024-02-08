@@ -7,7 +7,7 @@ import { FirebaseService } from '../services/firebase.service';
 import { TitleService } from '../services/title.service';
 import { LoadingService } from '../services/loading.service';
 import { IItem } from '../interfaces';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Component({
   selector: 'app-item-templates',
@@ -28,7 +28,10 @@ export class ItemTemplatesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.items = this._firebaseService.query('Items');
+    this.loadingService.isLoading.set(true);
+    this.items = this._firebaseService.query('Items').pipe(
+      tap((_: any) => this.loadingService.isLoading.set(false))
+    );
   }
 
   openDialog(type: 'Add' | 'Edit', item: IItem = null) {
