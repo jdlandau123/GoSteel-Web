@@ -93,6 +93,7 @@ export class OrdersComponent implements OnInit, AfterViewInit {
   }
 
   buildTableRows() {
+    this.loadingService.isLoading.set(true);
     forkJoin({
       orders: this._firebaseService.query<IOrder>('Orders', null, orderBy('dateCreated', 'desc')),
       customers: this._firebaseService.query<ICustomer>('Customers'),
@@ -108,6 +109,7 @@ export class OrdersComponent implements OnInit, AfterViewInit {
     ).subscribe((rows: ITableRow[]) => {
       this.tableRows.next(rows);
       this.searchInput.setValue('');
+      this.loadingService.isLoading.set(false);
     })
   }
 
@@ -126,13 +128,14 @@ export class OrdersComponent implements OnInit, AfterViewInit {
     this.selection.select(...this.tableDatasource.data);
   }
 
-  generateInvoices() {
-    for (let row of this.selection.selected) {
-      this.invoiceService.createInvoice(row.id);
-    }
+  async generateInvoices() {
     this._snackBar.open('Generating Invoices');
+    for (let row of this.selection.selected) {
+      await this.invoiceService.createInvoice(row.id);
+    }
     this.buildTableRows();
     this.selection = new SelectionModel<ITableRow>(true, []);
+    this._snackBar.open('Invoices Generated');
   }
 
 }

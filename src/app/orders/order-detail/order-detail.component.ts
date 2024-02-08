@@ -372,6 +372,7 @@ export class OrderDetailComponent implements OnInit {
   createInvoice() {
     this.invoiceService.createInvoice(this.id);
     this.orderForm.controls.hasInvoice.setValue(true);
+    this._snackbar.open('Invoice Generated');
   }
 
   downloadInvoice() {

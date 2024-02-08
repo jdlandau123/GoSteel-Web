@@ -26,11 +26,9 @@ import {
   ref,
   uploadBytes,
   getDownloadURL,
-  getBlob
-} from "firebase/storage";
-import { BehaviorSubject, tap } from 'rxjs';
+} from "firebase/storage"
+import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
-import { LoadingService } from './loading.service';
 import { from, map } from 'rxjs';
 
 @Injectable({
@@ -45,7 +43,7 @@ export class FirebaseService {
   isLoggedIn = signal(false);
   storage: any;
 
-  constructor(private _router: Router, private _loadingService: LoadingService) {
+  constructor(private _router: Router) {
     this.firebaseApp.subscribe(app => {
       if (app) {
         this.firebaseAnalytics = getAnalytics(app);
@@ -102,8 +100,6 @@ export class FirebaseService {
   query<T>(collectionName: string, whereClause: any = null, order: QueryOrderByConstraint = null) {
     // where should be a firebase where object
     // order should be a firebase orderBy object
-    this._loadingService.isLoading.set(true);
-
     let q;
     const col = collection(this.db, collectionName);
 
@@ -113,7 +109,6 @@ export class FirebaseService {
     else q = query(col);
 
     return from(getDocs(q)).pipe(
-      tap(() => this._loadingService.isLoading.set(false)),
       map(d => d.docs.map(i => ({id: i.id, ...i.data()}) as T))
     );
   }
