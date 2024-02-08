@@ -7,7 +7,7 @@ import { TitleService } from '../services/title.service';
 import { FirebaseService } from '../services/firebase.service';
 import { LoadingService } from '../services/loading.service';
 import { BehaviorSubject, Observable, forkJoin, startWith, map } from 'rxjs';
-import { ICustomer, IOrder } from '../interfaces';
+import { ICustomer, IOrder, IShow } from '../interfaces';
 import { Timestamp, orderBy } from 'firebase/firestore';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
@@ -36,6 +36,11 @@ export interface ITableRow {
     workPhone: string;
     companyName: string;
     businessType: string;
+  },
+  show: {
+    id: string;
+    name: string;
+    startDate: Timestamp;
   }
 }
 
@@ -83,6 +88,7 @@ export class OrdersComponent implements OnInit, AfterViewInit {
           || r?.customer?.phone?.toLowerCase().includes(searchText)
           || r?.customer?.workPhone?.toLowerCase().includes(searchText)
           || r?.customer?.companyName?.toLowerCase().includes(searchText)
+          || r?.show?.name?.toLowerCase().includes(searchText)
       }))
     );
     this.filteredTableRows.subscribe(rows => this.tableDatasource.data = rows);
@@ -97,12 +103,14 @@ export class OrdersComponent implements OnInit, AfterViewInit {
     forkJoin({
       orders: this._firebaseService.query<IOrder>('Orders', null, orderBy('dateCreated', 'desc')),
       customers: this._firebaseService.query<ICustomer>('Customers'),
+      shows: this._firebaseService.query<IShow>('Shows'),
     }).pipe(
       map(data => {
         const res = [];
         for (let order of data.orders) {
           const customer = data.customers.find(c => c.id === order.customerId);
-          res.push({customer, ...order});
+          const show = data.shows.find(s => s.id === order.showId);
+          res.push({customer, show, ...order});
         }
         return res
       })
@@ -136,6 +144,30 @@ export class OrdersComponent implements OnInit, AfterViewInit {
     this.buildTableRows();
     this.selection = new SelectionModel<ITableRow>(true, []);
     this._snackBar.open('Invoices Generated');
+  }
+
+  exportCsv() {
+    const rows: any[] = [
+      [
+        'Order ID', 'Show Name', 'Date', 'Date Paid', 'Date Shipped', 'First Name', 'Last Name', 'Company Name',
+        'Email', 'Phone', 'Work Phone', 'Business Type', 'Stand Color', 'Total Price'
+      ]
+    ];
+    let csv = 'data:text/csv;charset=utf-8,';
+    for (let row of this.selection.selected) {
+      rows.push([
+        row.id, row?.show?.name, row.dateCreated.toDate().toLocaleDateString(), row?.datePaid?.toDate().toLocaleDateString(),
+        row?.dateShipped?.toDate().toLocaleDateString(), row?.customer?.firstName, row?.customer?.lastName,
+        row?.customer?.companyName, row?.customer?.email, row?.customer?.phone, row?.customer?.workPhone,
+        row?.customer?.businessType, row?.standColor, row?.totalPrice
+      ]);
+    }
+    csv += rows.map(r => r.join(',')).join('\n');
+    const encodedUri = encodeURI(csv);
+    const link = document.createElement('a');
+    link.setAttribute('download', 'GoSteel_Orders_Export.csv');
+    link.href = encodedUri;
+    link.click();
   }
 
 }
