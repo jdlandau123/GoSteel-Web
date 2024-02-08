@@ -1,6 +1,9 @@
 <mat-toolbar color="primary">
     <span>{{titleService.title()}}</span>
     <span class="spacer"></span>
+    <button mat-icon-button [routerLink]="'/orders/new'">
+      <mat-icon>add</mat-icon>
+    </button>
     <button mat-icon-button aria-label="menu icon" [matMenuTriggerFor]="menu">
         <mat-icon>menu</mat-icon>
     </button>
